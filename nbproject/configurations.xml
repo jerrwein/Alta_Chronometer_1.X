@@ -6,6 +6,21 @@
                    projectFiles="true">
       <itemPath>Headers/system.h</itemPath>
       <itemPath>Headers/system_config.h</itemPath>
+      <itemPath>Headers/leds.h</itemPath>
+      <itemPath>Headers/usb_config.h</itemPath>
+      <itemPath>Headers/usb_ch9.h</itemPath>
+      <itemPath>Headers/usb.h</itemPath>
+      <itemPath>Headers/usb_common.h</itemPath>
+      <itemPath>Headers/usb_device.h</itemPath>
+      <itemPath>Headers/usb_hal.h</itemPath>
+      <itemPath>Headers/usb_hal_pic16f1.h</itemPath>
+      <itemPath>Headers/usb_device_hid.h</itemPath>
+      <itemPath>Headers/app_device_custom_hid.h</itemPath>
+      <itemPath>Headers/app_led_usb_status.h</itemPath>
+      <itemPath>Headers/usb_device_local.h</itemPath>
+      <itemPath>Headers/fixed_address_memory.h</itemPath>
+      <itemPath>Headers/io_mapping.h</itemPath>
+      <itemPath>Headers/power.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -18,6 +33,12 @@
                    projectFiles="true">
       <itemPath>Source/main.c</itemPath>
       <itemPath>Source/system.c</itemPath>
+      <itemPath>Source/leds.c</itemPath>
+      <itemPath>Source/usb_device.c</itemPath>
+      <itemPath>Source/app_led_usb_status.c</itemPath>
+      <itemPath>Source/usb_device_hid.c</itemPath>
+      <itemPath>Source/app_device_custom_hid.c</itemPath>
+      <itemPath>Source/usb_descriptors.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -67,7 +88,8 @@
       <HI-TECH-COMP>
         <property key="asmlist" value="true"/>
         <property key="define-macros" value=""/>
-        <property key="extra-include-directories" value="Headers"/>
+        <property key="extra-include-directories"
+                  value="Headers;../../../../opt/microchip/xc8/v2.00/pic/include/c90;../../../../opt/microchip/xc8/v2.00/pic/include"/>
         <property key="identifier-length" value="255"/>
         <property key="operation-mode" value="free"/>
         <property key="opt-xc8-compiler-strict_ansi" value="false"/>

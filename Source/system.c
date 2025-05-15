@@ -22,11 +22,9 @@
 
 #include <xc.h>
 #include "system.h"
-// USB #include "system_config.h"
-//#include "usb.h"
-//#include "leds.h"
-//#include "buttons.h"
-//#include "adc.h"
+#include "system_config.h"
+#include "usb.h"
+#include "leds.h"
 
 /** CONFIGURATION Bits **********************************************/
 // PIC16F1459 configuration bit settings:
@@ -89,7 +87,7 @@
 ********************************************************************/
 
 // Original
-#if 0
+#if 1
 void SYSTEM_Initialize( SYSTEM_STATE state )
 {
     switch(state)
@@ -101,46 +99,24 @@ void SYSTEM_Initialize( SYSTEM_STATE state )
                 OSCCON = 0xFC;  //HFINTOSC @ 16MHz, 3X PLL, PLL enabled
                 ACTCON = 0x90;  //Active clock tuning enabled for USB
             #endif
-            LED_Enable(LED_USB_DEVICE_STATE);
-            LED_Enable(LED_USB_DEVICE_HID_CUSTOM);
-            // JMW
-            LED_Enable(LED_D3);
-            LED_Enable(LED_D4);
-            
-            LED_Off(LED_USB_DEVICE_HID_CUSTOM);
-            LED_Off(LED_D3);
-            LED_Off(LED_D4);
-            // JMW
-
-            BUTTON_Enable(BUTTON_USB_DEVICE_HID_CUSTOM);
-            
-            ADC_SetConfiguration(ADC_CONFIGURATION_DEFAULT);
-            ADC_Enable(ADC_CHANNEL_POTENTIOMETER);
+            // Green LED
+            LED_Enable(LED_GREEN);
+            LED_Off(LED_GREEN);
+  
+            // Blue LED
+            LED_Enable(LED_BLUE);
+            LED_Off(LED_BLUE);
             break;
             
         case SYSTEM_STATE_USB_SUSPEND: 
             break;
             
-        case SYSTEM_STATE_USB_R
-        ESUME:
+        case SYSTEM_STATE_USB_RESUME:
             break;
     }
 }
 #endif
 
- 
-
-void SYSTEM_Initialize( void )
-{
-    // Green LED
-    LED1_TRIS = PIN_OUTPUT;
-    LED1_LAT = LED_OFF;
-    
-    // Blue LED
-    LED2_TRIS = PIN_OUTPUT;
-    LED2_LAT = LED_OFF;
-}
-			
 unsigned char led_toggle = 0;
 unsigned int ioc_hits = 0;
 

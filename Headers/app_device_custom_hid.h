@@ -20,68 +20,48 @@
  CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *******************************************************************/
 
-#ifndef SYSTEM_H
-#define SYSTEM_H
-
-#include <xc.h>
-#include <stdbool.h>
-
-#include "leds.h"
-
-#include "io_mapping.h"
-#include "fixed_address_memory.h"
-#include "power.h"
-
-
-// #define JMW_TIMER1_INT
-// #define JMW_IOC_RB7_INT
- 
-//Internal oscillator option setting.  Uncomment if using HFINTOSC+active clock 
-//tuning, instead of a crystal.  
-#define USE_INTERNAL_OSC        //Make sure 1uF-8uF extra capacitance is added on VDD net
-                                //to smooth VDD ripple from MAX3232 chip, before using this
-                                //with the original Low Pin Count USB Development Kit board.
-                                //If using the latest version of the board, this is not
-                                //required and is already present.
-
-
-
-#define MAIN_RETURN void
-
-/*** System States **************************************************/
-typedef enum
-{
-    SYSTEM_STATE_USB_START,
-    SYSTEM_STATE_USB_SUSPEND,
-    SYSTEM_STATE_USB_RESUME
-} SYSTEM_STATE;
-
 /*********************************************************************
-* Function: void SYSTEM_Initialize( SYSTEM_STATE state )
+* Function: void APP_DeviceCustomHIDInitialize(void);
 *
-* Overview: Initializes the system.
+* Overview: Initializes the Custom HID demo code
 *
 * PreCondition: None
-*
-* Input:  SYSTEM_STATE - the state to initialize the system into
-*
-* Output: None
-*
-********************************************************************/
-void SYSTEM_Initialize( SYSTEM_STATE state );
-
-/*********************************************************************
-* Function: void SYSTEM_Tasks(void)
-*
-* Overview: Runs system level tasks that keep the system running
-*
-* PreCondition: System has been initalized with SYSTEM_Initialize()
 *
 * Input: None
 *
 * Output: None
 *
 ********************************************************************/
-void SYSTEM_Tasks(void);
+void APP_DeviceCustomHIDInitialize();
 
-#endif //SYSTEM_H
+/*********************************************************************
+* Function: void APP_DeviceCustomHIDStart(void);
+*
+* Overview: Starts running the Custom HID demo.
+*
+* PreCondition: The device should be configured into the configuration
+*   that contains the custome HID interface.  The APP_DeviceCustomHIDInitialize()
+*   function should also have been called before calling this function.
+*
+* Input: None
+*
+* Output: None
+*
+********************************************************************/
+void APP_DeviceCustomHIDStart();
+
+/*********************************************************************
+* Function: void APP_DeviceCustomHIDTasks(void);
+*
+* Overview: Keeps the Custom HID demo running.
+*
+* PreCondition: The demo should have been initialized and started via
+*   the APP_DeviceCustomHIDInitialize() and APP_DeviceCustomHIDStart() demos
+*   respectively.
+*
+* Input: None
+*
+* Output: None
+*
+********************************************************************/
+void APP_DeviceCustomHIDTasks();
