@@ -37,10 +37,12 @@
 #include "app_device_custom_hid.h"
 #include "app_led_usb_status.h"
 
+const unsigned char fw_revision[2] = {1, 12};
+
+
 MAIN_RETURN main(void)
 {
     int delay_cnt, loop_cnt;
-    int junk;
     bool led_off = true;
     
 
