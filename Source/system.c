@@ -106,6 +106,17 @@ void SYSTEM_Initialize( SYSTEM_STATE state )
             // Blue LED
             LED_Enable(LED_BLUE);
             LED_Off(LED_BLUE);
+            
+            // Configure IR Detectors as inputs
+            TRISAbits.TRISA4 = 1;
+            TRISAbits.TRISA5 = 1;
+            // All PortB IOC positive & negative edge detectors off
+            // IOCBPbits.IOCBP = 0;
+            // IOCBNbits.IOCBN = 0;
+            // A4 rising edge detector on
+            // IOCAPbits.IOCAP4 = 1;
+            // A5 falling edge detector on
+            // IOCANbits.IOCAN7 = 1;
             break;
             
         case SYSTEM_STATE_USB_SUSPEND: 

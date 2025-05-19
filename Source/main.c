@@ -37,7 +37,7 @@
 #include "app_device_custom_hid.h"
 #include "app_led_usb_status.h"
 
-const unsigned char fw_revision[2] = {1, 12};
+const unsigned char fw_revision[2] = {1, 18};
 
 
 MAIN_RETURN main(void)
