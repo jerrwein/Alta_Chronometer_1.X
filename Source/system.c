@@ -26,6 +26,8 @@
 #include "usb.h"
 #include "leds.h"
 
+extern unsigned char counter_64[4];
+
 /** CONFIGURATION Bits **********************************************/
 // PIC16F1459 configuration bit settings:
 #if defined (USE_INTERNAL_OSC)	    // Define this in system.h if using the HFINTOSC for USB operation
@@ -143,12 +145,23 @@ void interrupt SYS_InterruptHigh(void)
     {
         // Reset interrupt flag
         PIR1bits.TMR1IF = 0;
+
         // Add your interrupt handler code here (e.g., toggle an LED)
-        if (++led_toggle == 4)
+//        if (++led_toggle == 4)
+//        {
+//            // Interrupt frequency = 7.630Hz, /4(8) = 0.9537 Hz
+//            LED_Toggle(LED_D4);
+//            led_toggle = 0;
+//        }
+        if (++counter_64[3] == 0)
         {
-            // Interrupt frequency = 7.630Hz, /4(8) = 0.9537 Hz
-            LED_Toggle(LED_D4);
-            led_toggle = 0;
+            if (++counter_64[2] == 0)
+            {
+                if (++counter_64[1] == 0)
+                {
+                    counter_64[0]++;
+                }
+            }
         }
     }
 #endif

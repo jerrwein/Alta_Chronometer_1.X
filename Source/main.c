@@ -37,23 +37,22 @@
 #include "app_device_custom_hid.h"
 #include "app_led_usb_status.h"
 
-const unsigned char fw_revision[2] = {1, 18};
-
+const unsigned char fw_revision[2] = {2, 23};
+unsigned char counter_64[4] = {0, 0, 0, 0};
 
 MAIN_RETURN main(void)
 {
     int delay_cnt, loop_cnt;
     bool led_off = true;
     
-
 #ifdef JMW_TIMER1_INT
 
     // Configure Timer1
     T1CONbits.TMR1ON = 0;   // Disable Timer1 initially
     T1CONbits.TMR1CS = 0;   // Select internal clock source (Fosc/4 = 4 MHz)
-    T1CONbits.T1CKPS = 3;   // Prescaling (1:8) 1M/65535=7.630Hz
+//    T1CONbits.T1CKPS = 3;   // Prescaling (1:8) 1M/65535=7.630Hz
 //    T1CONbits.T1CKPS = 2;   // Prescaling (1:4) 1M/65535=15.259Hz
-//    T1CONbits.T1CKPS = 1;   // Prescaling (1:2) 2M/65535=30.518Hz
+    T1CONbits.T1CKPS = 1;   // Prescaling (1:2) 2M/65535=30.518Hz
 //    T1CONbits.T1CKPS = 0;   // No prescaling (1:1) 4M/65535=61.036Hz
     T1GCONbits.TMR1GE = 0;  // No Gate Enable
 

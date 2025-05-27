@@ -33,7 +33,7 @@
 #include "power.h"
 
 
-// #define JMW_TIMER1_INT
+#define JMW_TIMER1_INT
 // #define JMW_IOC_RB7_INT
  
 //Internal oscillator option setting.  Uncomment if using HFINTOSC+active clock 
