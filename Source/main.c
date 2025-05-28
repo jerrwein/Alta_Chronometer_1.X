@@ -37,23 +37,33 @@
 #include "app_device_custom_hid.h"
 #include "app_led_usb_status.h"
 
-const unsigned char fw_revision[2] = {2, 23};
-unsigned char counter_64[4] = {0, 0, 0, 0};
+const unsigned char fw_revision[2] = {2, 31};
+unsigned char counter_64[4] = {0x00, 0x00, 0x00, 0x00};
+
+enum led_state
+{
+    ON_1,
+    OFF_1,
+    ON_2,
+    OFF_2
+};
 
 MAIN_RETURN main(void)
 {
-    int delay_cnt, loop_cnt;
+    int delay_cnt;
+    unsigned int loop_cnt;
     bool led_off = true;
+    enum led_state ledState = ON_1;
     
 #ifdef JMW_TIMER1_INT
 
-    // Configure Timer1
-    T1CONbits.TMR1ON = 0;   // Disable Timer1 initially
-    T1CONbits.TMR1CS = 0;   // Select internal clock source (Fosc/4 = 4 MHz)
-//    T1CONbits.T1CKPS = 3;   // Prescaling (1:8) 1M/65535=7.630Hz
-//    T1CONbits.T1CKPS = 2;   // Prescaling (1:4) 1M/65535=15.259Hz
-    T1CONbits.T1CKPS = 1;   // Prescaling (1:2) 2M/65535=30.518Hz
-//    T1CONbits.T1CKPS = 0;   // No prescaling (1:1) 4M/65535=61.036Hz
+    // Configure Timer1        Fosc = 16 Mhz * PLL / CPU_DIV = 16M * 3 / 1 = 48 Mhz
+    T1CONbits.TMR1ON = 0;     // Disable Timer1 initially
+    T1CONbits.TMR1CS = 0;     // Select instruction clock source (Fosc/4 = 48/4 =  12 MHz)
+//  T1CONbits.T1CKPS = 3;   // Prescaling (1:8)  500K/65536 = 22.89 Hz
+//  T1CONbits.T1CKPS = 2;   // Prescaling (1:4)    3M/65536 = 45.77 Hz
+    T1CONbits.T1CKPS = 1;   // Prescaling (1:2)    6M/65536 = 91.55 Hz
+//    T1CONbits.T1CKPS = 0;   // No prescaling (1:1)  12M/65536 = 183.1 Hz
     T1GCONbits.TMR1GE = 0;  // No Gate Enable
 
     // Clear TMR1 registers
@@ -100,24 +110,80 @@ MAIN_RETURN main(void)
     INTCONbits.GIE = 1;     // Enable global interrupts
 #endif
 
+    loop_cnt = 0;
     while(1)
     {
-// JMW No USB Yet       SYSTEM_Tasks();
+//        SYSTEM_Tasks();
+#if 1 
         loop_cnt++;
-        if ((3 < loop_cnt) && led_off)
+        switch (ledState)
+        {
+            case ON_1:
+                if (15000 < loop_cnt)
+                {
+                    LED_Off (LED_GREEN);
+                    loop_cnt = 0;
+                    ledState = OFF_1;
+                }
+                break;
+            case OFF_1:
+                if (15000 < loop_cnt)
+                {
+                    LED_On (LED_GREEN);
+                    loop_cnt = 0;
+                    ledState = ON_2;
+                }
+                break;
+            case ON_2:
+                if (15000 < loop_cnt)
+                {
+                    LED_Off (LED_GREEN);
+                    loop_cnt = 0;
+                    ledState = OFF_2;
+                }
+                break;  
+            case OFF_2:
+                if (30000 < loop_cnt)
+                {
+                    LED_On (LED_GREEN);
+                    loop_cnt = 0;
+                    ledState = ON_1;
+                }
+                break;
+            default:
+                LED_On (LED_GREEN);
+                    loop_cnt = 0;
+                    ledState = ON_1;
+        }
+#endif
+#if 0
+        loop_cnt++;
+        if (led_off && (0 < loop_cnt) && (loop_cnt < 500))
         {
             LED_On (LED_GREEN);
             led_off = false;
         }
-        else if ((1000 < loop_cnt) && !led_off)
+        else if (!led_off && (500 < loop_cnt) && (loop_cnt < 1000))
         {
             LED_Off (LED_GREEN);
             led_off = true;
         }
-        else if (2000 < loop_cnt)
+        else if (led_off && (1000 < loop_cnt) && (loop_cnt < 1500))
+        {
+            LED_On (LED_GREEN);
+            led_off = false;
+        }
+        else if (!led_off && (1500 < loop_cnt) && (loop_cnt < 2500))
+        {
+            LED_Off (LED_GREEN);
+            led_off = true;
+        }
+        else if (2500 < loop_cnt)
         {
             loop_cnt = 0;
         }
+#endif
+
         
         #if defined(USB_POLLING)
             // Interrupt or polling method.  If using polling, must call

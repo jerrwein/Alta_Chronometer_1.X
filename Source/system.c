@@ -147,6 +147,7 @@ void interrupt SYS_InterruptHigh(void)
         PIR1bits.TMR1IF = 0;
 
         // Add your interrupt handler code here (e.g., toggle an LED)
+//        LED_Toggle (LED_GREEN);
 //        if (++led_toggle == 4)
 //        {
 //            // Interrupt frequency = 7.630Hz, /4(8) = 0.9537 Hz
