@@ -26,7 +26,10 @@
 #include "usb.h"
 #include "leds.h"
 
-extern unsigned char counter_64[4];
+extern uint8_t  counter_32[4];
+// extern uint8_t  timer2_64[4];
+extern TmData   tmr2_data;
+
 
 /** CONFIGURATION Bits **********************************************/
 // PIC16F1459 configuration bit settings:
@@ -148,22 +151,58 @@ void interrupt SYS_InterruptHigh(void)
 
         // Add your interrupt handler code here (e.g., toggle an LED)
 //        LED_Toggle (LED_GREEN);
-//        if (++led_toggle == 4)
-//        {
-//            // Interrupt frequency = 7.630Hz, /4(8) = 0.9537 Hz
-//            LED_Toggle(LED_D4);
-//            led_toggle = 0;
-//        }
-        if (++counter_64[3] == 0)
+
+        if (++counter_32[3] == 0)
         {
-            if (++counter_64[2] == 0)
+            if (++counter_32[2] == 0)
             {
-                if (++counter_64[1] == 0)
+                if (++counter_32[1] == 0)
                 {
-                    counter_64[0]++;
+                    counter_32[0]++;
                 }
             }
         }
+    }
+#endif
+
+#ifdef JMW_TIMER2_INT
+        // Handle Timer2 interrupt (e.g., if enabled)
+    if (PIR1bits.TMR2IF)    // Check TMR2IF flag
+    {
+        // Reset interrupt flag
+        PIR1bits.TMR2IF = 0;
+
+        // Add your interrupt handler code here (e.g., toggle an LED)
+//        LED_Toggle (LED_GREEN);
+#if 0
+        if (++timer2_64[0] == 0)
+        {
+            if (++timer2_64[1] == 0)
+            {
+                if (++timer2_64[2] == 0)
+                {
+                    timer2_64[3]++;
+                }
+            }
+        }
+#endif
+
+#if 0
+        if (++tmr2_data.tm_u8[0] == 0)
+        {
+            if (++tmr2_data.tm_u8[1] == 0)
+            {
+                if (++tmr2_data.tm_u8[2] == 0)
+                {
+                    tmr2_data.tm_u8[3]++;
+                }
+            }
+        }
+#endif
+
+#if 1
+        tmr2_data.tm_u32++;
+#endif
     }
 #endif
 

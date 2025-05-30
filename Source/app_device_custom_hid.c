@@ -30,7 +30,9 @@
 
 /** Ecternal Variables *********************************************/
 extern const unsigned char fw_revision[2];
-extern unsigned char counter_64[4];
+extern uint8_t counter_32[4];
+//extern uint8_t timer2_64[4];
+extern TmData   tmr2_data;
 
 /** VARIABLES ******************************************************/
 /* Some processors have a limited range of RAM addresses where the USB module
@@ -67,6 +69,7 @@ typedef enum
     COMMAND_READ_POTENTIOMETER = 0x37,
     COMMAND_READ_IR_DETECTORS = 0x39,
     COMMAND_READ_HIRES_TIMER = 0x41,
+    COMMAND_READ_200US_TIMER = 0x42,
     COMMAND_READ_IR_TIMES = 0x43
 } CUSTOM_HID_DEMO_COMMANDS;
 
@@ -162,10 +165,24 @@ void APP_DeviceCustomHIDTasks()
                 if (!HIDTxHandleBusy(USBInHandle))
                 {
                     ToSendDataBuffer[0] = 0x41;	// Echo back to the host PC the command we are fulfilling in the first uint8_t.  In this case, the Get Pushbutton State command.
-                    ToSendDataBuffer[1] = counter_64[0];
-                    ToSendDataBuffer[2] = counter_64[1];
-                    ToSendDataBuffer[3] = counter_64[2];
-                    ToSendDataBuffer[4] = counter_64[3];
+                    ToSendDataBuffer[1] = counter_32[0];
+                    ToSendDataBuffer[2] = counter_32[1];
+                    ToSendDataBuffer[3] = counter_32[2];
+                    ToSendDataBuffer[4] = counter_32[3];
+                    // Prepare the USB module to send the data packet to the host
+                    USBInHandle = HIDTxPacket(CUSTOM_DEVICE_HID_EP, (uint8_t*)&ToSendDataBuffer[0],64);
+                }
+                break;
+
+            case COMMAND_READ_200US_TIMER:
+                // Check to make sure the endpoint/buffer is free before we modify the contents
+                if (!HIDTxHandleBusy(USBInHandle))
+                {
+                    ToSendDataBuffer[0] = 0x42;	// Echo back to the host PC the command we are fulfilling in the first uint8_t.  In this case, the Get Pushbutton State command.
+                    ToSendDataBuffer[1] = tmr2_data.tm_u8[0];
+                    ToSendDataBuffer[2] = tmr2_data.tm_u8[1];
+                    ToSendDataBuffer[3] = tmr2_data.tm_u8[2];
+                    ToSendDataBuffer[4] = tmr2_data.tm_u8[3];
                     // Prepare the USB module to send the data packet to the host
                     USBInHandle = HIDTxPacket(CUSTOM_DEVICE_HID_EP, (uint8_t*)&ToSendDataBuffer[0],64);
                 }

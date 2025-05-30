@@ -24,16 +24,25 @@
 #define SYSTEM_H
 
 #include <xc.h>
+
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "leds.h"
-
 #include "io_mapping.h"
 #include "fixed_address_memory.h"
 #include "power.h"
 
+typedef union
+{
+    uint8_t  tm_u8[4];
+    uint16_t tm_16[2];
+    uint32_t tm_u32;
+} TmData;
 
 #define JMW_TIMER1_INT
+#define JMW_TIMER2_INT
 // #define JMW_IOC_RB7_INT
  
 //Internal oscillator option setting.  Uncomment if using HFINTOSC+active clock 
@@ -43,7 +52,6 @@
                                 //with the original Low Pin Count USB Development Kit board.
                                 //If using the latest version of the board, this is not
                                 //required and is already present.
-
 
 
 #define MAIN_RETURN void

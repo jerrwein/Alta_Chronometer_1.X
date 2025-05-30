@@ -23,6 +23,8 @@
 
 /** INCLUDES *******************************************************/
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include <xc.h>
 
@@ -37,8 +39,9 @@
 #include "app_device_custom_hid.h"
 #include "app_led_usb_status.h"
 
-const unsigned char fw_revision[2] = {2, 31};
-unsigned char counter_64[4] = {0x00, 0x00, 0x00, 0x00};
+const unsigned char fw_revision[2] = {3, 14};
+uint8_t counter_32[4] = {0x00, 0x00, 0x00, 0x00};
+TmData tmr2_data;
 
 enum led_state
 {
@@ -51,12 +54,14 @@ enum led_state
 MAIN_RETURN main(void)
 {
     int delay_cnt;
-    unsigned int loop_cnt;
+//    unsigned int loop_cnt;
     bool led_off = true;
     enum led_state ledState = ON_1;
+    volatile uint16_t last_tmr2_lsw;
+    volatile uint16_t test_tmr2_lsw;
+    uint16_t led_cycle_start;
     
 #ifdef JMW_TIMER1_INT
-
     // Configure Timer1        Fosc = 16 Mhz * PLL / CPU_DIV = 16M * 3 / 1 = 48 Mhz
     T1CONbits.TMR1ON = 0;     // Disable Timer1 initially
     T1CONbits.TMR1CS = 0;     // Select instruction clock source (Fosc/4 = 48/4 =  12 MHz)
@@ -71,6 +76,25 @@ MAIN_RETURN main(void)
     TMR1L = 0;
  //    TMR1 = 0; // clear timer value
     // JMW Timer 1 End
+#endif // #ifdef JMW_TIMER1_INT
+
+#ifdef JMW_TIMER2_INT
+    // Configure Timer2          Fosc = 16 Mhz * PLL / CPU_DIV = 16M * 3 / 1 = 48 MHz
+    // Pre-scaler input clock    Fosc/4 = 12 MHz
+    T2CONbits.TMR2ON = 0;     // Disable Timer2 initially
+//  T2CONbits.T2CKPS = 1;     // Select clock pre-scale of 4 (12MHz/4 =  3 MHz)
+    T2CONbits.T2CKPS = 2;     // Select clock pre-scale of 16 (12MHz/16 =  750 KHz)
+//  T2CONbits.T2CKPS = 0;      // Prescaling 1 = 12 MHz
+//  T2CONbits.T2CKPS = 2;      // Prescaling 16 = 750 KHz
+//  T2CONbits.T2CKPS = 3;      // Prescaling 64 = 187500 KHz
+    T2CONbits.T2OUTPS = 0;     // Output post-scaling = 1
+
+    // Timer2 Period Register (Compare))
+//  PR2 = 149;                  // Divide by 150 (3M / 150 = 20 KHz, T = 50 us)
+    PR2 = 149;                  // Divide by 150 (750K / 150 = 5 KHz, T = 200 us)
+
+    // Clear TMR2 register
+    TMR2 = 0;
 #endif // #ifdef JMW_TIMER1_INT
 
 #ifdef JMW_IOC_RB7_INT
@@ -100,60 +124,77 @@ MAIN_RETURN main(void)
     INTCONbits.PEIE = 1;    // Enable peripheral interrupts
 #endif
 
+#ifdef JMW_TIMER2_INT
+    // Enable Timer2
+    T2CONbits.TMR2ON = 1;
+    // Enable interrupts from Timer2
+    PIE1bits.TMR2IE = 1;    // Enable Timer2 interrupt
+    INTCONbits.PEIE = 1;    // Enable peripheral interrupts
+#endif
+
 #ifdef JMW_IOC_RB7_INT
     // Enable IOC interrupts
     INTCONbits.IOCIE = 1;
 #endif
 
-#if defined(JMW_TIMER1_INT) || defined(JMW_IOC_RB7_INT)
+    tmr2_data.tm_u32 = 0x00000000;
+
+#if defined(JMW_TIMER1_INT) || defined(JMW_TIMER2_INT) || defined(JMW_IOC_RB7_INT)
     // JMW - Enable global interrupts
     INTCONbits.GIE = 1;     // Enable global interrupts
 #endif
 
-    loop_cnt = 0;
+//  loop_cnt = 0;
+    led_cycle_start = tmr2_data.tm_16[0];
+    LED_On (LED_GREEN);
+
     while(1)
     {
 //        SYSTEM_Tasks();
+
+        last_tmr2_lsw = tmr2_data.tm_16[0];
+ //     loop_cnt++;
+        test_tmr2_lsw = tmr2_data.tm_16[0];
 #if 1 
-        loop_cnt++;
-        switch (ledState)
+        // Make sure the timer read was atomic
+        if (last_tmr2_lsw == test_tmr2_lsw)
         {
-            case ON_1:
-                if (15000 < loop_cnt)
-                {
-                    LED_Off (LED_GREEN);
-                    loop_cnt = 0;
-                    ledState = OFF_1;
-                }
-                break;
-            case OFF_1:
-                if (15000 < loop_cnt)
-                {
+            switch (ledState)
+            {
+                case ON_1:      // ON_1 lasts 150 ms.
+                    if (750 < (last_tmr2_lsw-led_cycle_start))
+                    {
+                        LED_Off (LED_GREEN);
+                        ledState = OFF_1;
+                    }
+                    break;
+                case OFF_1:      // OFF_1 lasts 150 ms.
+                    if (1500 < (last_tmr2_lsw-led_cycle_start))
+                    {
+                        LED_On (LED_GREEN);
+                        ledState = ON_2;
+                    }
+                    break;
+                case ON_2:      // ON_1 lasts 150 ms.
+                    if (2250 < (last_tmr2_lsw-led_cycle_start))
+                    {
+                        LED_Off (LED_GREEN);
+                        ledState = OFF_2;
+                    }
+                    break;
+                case OFF_2:      // OFF_2 lasts 550 ms.
+                    if (5000 < (last_tmr2_lsw-led_cycle_start))
+                    {
+                        LED_On (LED_GREEN);
+                        led_cycle_start = last_tmr2_lsw;
+                        ledState = ON_1;
+                    }
+                    break;
+                default:
                     LED_On (LED_GREEN);
-                    loop_cnt = 0;
-                    ledState = ON_2;
-                }
-                break;
-            case ON_2:
-                if (15000 < loop_cnt)
-                {
-                    LED_Off (LED_GREEN);
-                    loop_cnt = 0;
-                    ledState = OFF_2;
-                }
-                break;  
-            case OFF_2:
-                if (30000 < loop_cnt)
-                {
-                    LED_On (LED_GREEN);
-                    loop_cnt = 0;
+                    led_cycle_start = last_tmr2_lsw;
                     ledState = ON_1;
-                }
-                break;
-            default:
-                LED_On (LED_GREEN);
-                    loop_cnt = 0;
-                    ledState = ON_1;
+            }
         }
 #endif
 #if 0
