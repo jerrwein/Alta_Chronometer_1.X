@@ -39,7 +39,7 @@
 #include "app_device_custom_hid.h"
 #include "app_led_usb_status.h"
 
-const unsigned char fw_revision[2] = {3, 14};
+const unsigned char fw_revision[2] = {3, 20};
 uint8_t counter_32[4] = {0x00, 0x00, 0x00, 0x00};
 TmData tmr2_data;
 

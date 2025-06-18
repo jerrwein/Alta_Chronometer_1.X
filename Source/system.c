@@ -112,12 +112,15 @@ void SYSTEM_Initialize( SYSTEM_STATE state )
             LED_Enable(LED_BLUE);
             LED_Off(LED_BLUE);
             
-            // Configure IR Detectors as inputs
+            // Configure IR Detectors as I/O inputs
             TRISAbits.TRISA4 = 1;
             TRISAbits.TRISA5 = 1;
-            // All PortB IOC positive & negative edge detectors off
-            // IOCBPbits.IOCBP = 0;
-            // IOCBNbits.IOCBN = 0;
+            ANSELAbits.ANSELA = 0;   /* Important */
+ //         ANSELAbits.ANSA4 = 0;    /* Not working - Investigate? */
+
+            // All PortA IOC positive & negative edge detectors off
+            // IOCAPbits.IOCAP = 0;
+            // IOCBNbits.IOCAN = 0;
             // A4 rising edge detector on
             // IOCAPbits.IOCAP4 = 1;
             // A5 falling edge detector on

@@ -59,6 +59,7 @@ extern TmData   tmr2_data;
 
 volatile USB_HANDLE USBOutHandle;    
 volatile USB_HANDLE USBInHandle;
+volatile uint8_t ir_detector_byte;
 
 /** DEFINITIONS ****************************************************/
 typedef enum
@@ -154,8 +155,9 @@ void APP_DeviceCustomHIDTasks()
                 if(!HIDTxHandleBusy(USBInHandle))
                 {
                     ToSendDataBuffer[0] = 0x39;	//Echo back to the host PC the command we are fulfilling in the first uint8_t.  In this case, the Get Pushbutton State command.
-                    ToSendDataBuffer[1] = (PORTAbits.RA4) ? 0x33 : 0x11;
-                    ToSendDataBuffer[2] = (PORTAbits.RA4) ? 0x44 : 0x22;
+                    ir_detector_byte = PORTA;
+                    ToSendDataBuffer[1] = (ir_detector_byte & 0x10) ? 0x33 : 0x11;
+                    ToSendDataBuffer[2] = (ir_detector_byte & 0x20) ? 0x44 : 0x22;
                     //Prepare the USB module to send the data packet to the host
                     USBInHandle = HIDTxPacket(CUSTOM_DEVICE_HID_EP, (uint8_t*)&ToSendDataBuffer[0],64);
                 }
